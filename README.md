@@ -72,8 +72,8 @@ Returns:
 
 ```bash
 # Clone and run
-git clone https://github.com/vinit-chauhan/bloomservice.git
-cd bloomservice
+git clone https://github.com/vinit-chauhan/go-bloomservice.git
+cd go-bloomservice
 go run main.go
 ```
 
