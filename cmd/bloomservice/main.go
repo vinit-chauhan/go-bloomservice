@@ -16,8 +16,19 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/vinit-chauhan/go-bloomservice/internal/bloom"
 )
 
 func main() {
-	fmt.Println("Hello, Bloom Service!")
+	filter := bloom.New(100_000, 5)
+
+	filter.Add("hello")
+	filter.Add("world")
+
+	fmt.Println(filter.Check("hello")) // true
+	fmt.Println(filter.Check("world")) // true
+	fmt.Println(filter.Check("foo"))   // false
+
+	filter.Clear()
 }
