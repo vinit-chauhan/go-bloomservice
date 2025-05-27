@@ -26,9 +26,9 @@ func main() {
 	filter.Add("hello")
 	filter.Add("world")
 
-	fmt.Println(filter.Check("hello")) // true
-	fmt.Println(filter.Check("world")) // true
-	fmt.Println(filter.Check("foo"))   // false
+	fmt.Println(filter.Exists("hello")) // true
+	fmt.Println(filter.Exists("world")) // true
+	fmt.Println(filter.Exists("foo"))   // false
 
 	filter.Clear()
 }

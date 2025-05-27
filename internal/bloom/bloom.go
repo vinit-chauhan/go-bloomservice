@@ -77,7 +77,7 @@ func (b *BloomFilter) Add(item string) {
 	}
 }
 
-// Check Checks if an item is in the bloom filter
+// Exists Checks if an item is in the bloom filter
 // parameters:
 //
 //	item	: item to check in the bloom filter
@@ -85,7 +85,7 @@ func (b *BloomFilter) Add(item string) {
 // returns:
 //
 //	bool	: true if the item is in the bloom filter, false otherwise
-func (b *BloomFilter) Check(item string) bool {
+func (b *BloomFilter) Exists(item string) bool {
 	idx := b.doHash(item)
 	for _, index := range idx {
 		if !b.bitArray[index] {
