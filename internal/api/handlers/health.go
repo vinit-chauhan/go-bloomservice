@@ -12,4 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package handlers
+
+import "github.com/gofiber/fiber/v2"
+
+func HealthHandler(c *fiber.Ctx) error {
+	// This is a simple health check endpoint that returns a 200 OK status
+	// with a message indicating that the service is running.
+	return c.JSON(fiber.Map{
+		"status":  "ok",
+		"message": "Bloom service is running",
+	})
+}

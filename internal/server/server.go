@@ -13,3 +13,23 @@
 // limitations under the License.
 
 package server
+
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/vinit-chauhan/go-bloomservice/internal/api"
+)
+
+func StartServer() {
+	app := fiber.New(
+		fiber.Config{
+			DisableStartupMessage: true,
+			StrictRouting:         true,
+			CaseSensitive:         true,
+		},
+	)
+
+	app.Route("/", api.HealthRouter)
+	app.Route("/api/v1", api.BloomRouter)
+
+	app.Listen(":8080")
+}

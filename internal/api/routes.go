@@ -13,3 +13,42 @@
 // limitations under the License.
 
 package api
+
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/vinit-chauhan/go-bloomservice/internal/api/handlers"
+)
+
+func HealthRouter(router fiber.Router) {
+	router.Get("/health", handlers.HealthHandler)
+}
+
+func BloomRouter(router fiber.Router) {
+	// Add item to the Bloom filter
+	// Body:
+	// {
+	//   "item": "string" // item to add to the Bloom filter
+	// }
+	router.Post("/add", handlers.AddHandler)
+
+	// Check if an item is in the Bloom filter
+	// Body:
+	// {
+	//   "item": "string" // item to check in the Bloom filter
+	// }
+	router.Post("/exists", handlers.CheckHandler)
+
+	// Get statistics about the Bloom filter
+	// Returns:
+	// {
+	//   "size": 123456, // size of the Bloom filter in bits
+	//   "num_hash_functions": 5, // number of hash functions used
+	//   "num_items": 1000, // number of items added to the Bloom filter
+	//   "false_positive_rate": 0.01 // estimated false positive rate
+	// }
+	router.Get("/stats", handlers.StatsHandler)
+
+	// Reset the Bloom filter
+	// This endpoint clears the Bloom filter, resetting it to its initial state.
+	router.Delete("/reset", handlers.ResetHandler)
+}
