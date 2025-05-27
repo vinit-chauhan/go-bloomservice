@@ -23,9 +23,12 @@ func TestNew(t *testing.T) {
 }
 
 func TestAddAndExists(t *testing.T) {
-	filter := New(100_00, 5)
 	items := []string{"apple", "banana", "cherry", "date", "elderberry"}
 	nonItems := []string{"fig", "grape", "honeydew", "kiwi", "lemon"}
+
+	size, hashes := CalculateOptimalParameters(len(items), 0.01)
+	filter := New(size, hashes)
+
 	for _, item := range items {
 		filter.Add(item)
 	}
@@ -44,9 +47,11 @@ func TestAddAndExists(t *testing.T) {
 }
 
 func TestAddAndExistsRandomStrings(t *testing.T) {
-	filter := New(100_000, 5)
+	n := 100
+	items := test.GenerateStringsOfLength(10, n)
 
-	items := test.GenerateStringsOfLength(10, 100)
+	size, hashes := CalculateOptimalParameters(n, 0.01)
+	filter := New(size, hashes)
 
 	for _, item := range items {
 		filter.Add(item)

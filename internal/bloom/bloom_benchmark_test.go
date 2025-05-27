@@ -9,9 +9,9 @@ import (
 func BenchmarkBloomFilter_FalsePositives(b *testing.B) {
 	n := 100_000     // Number of items to add
 	testN := 100_000 // Number of items to test
-	size := n * 20   // Size of the bloom filter
-	k := 5           // Number of hash functions
-	filter := New(size, k)
+
+	size, hashes := CalculateOptimalParameters(n, 0.0005) // 0.05% false positive rate
+	filter := New(size, hashes)
 
 	items := test.GenerateStringsOfLength(10, n)
 	for _, item := range items {
@@ -31,9 +31,10 @@ func BenchmarkBloomFilter_FalsePositives(b *testing.B) {
 	b.Logf("False positivity rate: %.2f%%", falsePositivePct)
 
 	// Ensure the false positive rate is within acceptable limits
-	// For a well-configured bloom filter, this should be less than 1%
-	if falsePositivePct > 0.1 {
-		b.Fatalf("False positivity rate exceeded 1%%: %.2f%%", falsePositivePct)
+	// For a well-configured bloom filter, this should be less than 0.1%
+	targetPct := 0.1
+	if falsePositivePct > targetPct {
+		b.Fatalf("False positivity rate exceeded %.2f%%: %.2f%%", targetPct, falsePositivePct)
 	}
 	b.ResetTimer()
 }

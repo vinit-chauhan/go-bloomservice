@@ -21,7 +21,10 @@ import (
 )
 
 func main() {
-	filter := bloom.New(100_000, 5)
+
+	size, numHashFunc := bloom.CalculateOptimalParameters(100_000, 0.01)
+	fmt.Printf("Optimal size: %d, Optimal number of hash functions: %d\n", size, numHashFunc)
+	filter := bloom.New(size, numHashFunc)
 
 	filter.Add("hello")
 	filter.Add("world")
