@@ -15,23 +15,13 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/vinit-chauhan/go-bloomservice/internal/bloom"
+	"github.com/vinit-chauhan/go-bloomservice/internal/server"
 )
 
 func main() {
+	estimatedKeys, falsePositiveRate := 100_000, 0.01
+	bloom.Init(estimatedKeys, falsePositiveRate)
 
-	size, numHashFunc := bloom.CalculateOptimalParameters(100_000, 0.01)
-	fmt.Printf("Optimal size: %d, Optimal number of hash functions: %d\n", size, numHashFunc)
-	filter := bloom.New(size, numHashFunc)
-
-	filter.Add("hello")
-	filter.Add("world")
-
-	fmt.Println(filter.Exists("hello")) // true
-	fmt.Println(filter.Exists("world")) // true
-	fmt.Println(filter.Exists("foo"))   // false
-
-	filter.Clear()
+	server.StartServer()
 }

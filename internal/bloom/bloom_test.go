@@ -7,18 +7,13 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	filter := New(100, 5)
-	if filter.size != 100 {
-		t.Errorf("Expected size 100, got %d", filter.size)
+	params := CalculateOptimalParameters(100, 0.01)
+	filter := New(params)
+	if len(filter.bitArray) != int(params.Size) {
+		t.Errorf("Expected size %d, got %d", params.Size, len(filter.bitArray))
 	}
-	if filter.hashFunctions != 5 {
-		t.Errorf("Expected 5 hash functions, got %d", filter.hashFunctions)
-	}
-	if len(filter.bitArray) != 100 {
-		t.Errorf("Expected bit array length 100, got %d", len(filter.bitArray))
-	}
-	if len(filter.hashFuncList) != 5 {
-		t.Errorf("Expected 5 hash functions in list, got %d", len(filter.hashFuncList))
+	if len(filter.hashFuncList) != int(params.NumHashFunctions) {
+		t.Errorf("Expected %d hash functions, got %d", params.NumHashFunctions, len(filter.hashFuncList))
 	}
 }
 
@@ -26,8 +21,8 @@ func TestAddAndExists(t *testing.T) {
 	items := []string{"apple", "banana", "cherry", "date", "elderberry"}
 	nonItems := []string{"fig", "grape", "honeydew", "kiwi", "lemon"}
 
-	size, hashes := CalculateOptimalParameters(len(items), 0.01)
-	filter := New(size, hashes)
+	params := CalculateOptimalParameters(len(items), 0.01)
+	filter := New(params)
 
 	for _, item := range items {
 		filter.Add(item)
@@ -50,8 +45,8 @@ func TestAddAndExistsRandomStrings(t *testing.T) {
 	n := 100
 	items := test.GenerateStringsOfLength(10, n)
 
-	size, hashes := CalculateOptimalParameters(n, 0.01)
-	filter := New(size, hashes)
+	params := CalculateOptimalParameters(n, 0.01)
+	filter := New(params)
 
 	for _, item := range items {
 		filter.Add(item)
@@ -65,8 +60,9 @@ func TestAddAndExistsRandomStrings(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	filter := New(100_000, 5)
 	items := test.GenerateStringsOfLength(10, 100)
+	params := CalculateOptimalParameters(len(items), 0.01)
+	filter := New(params)
 
 	for _, item := range items {
 		filter.Add(item)

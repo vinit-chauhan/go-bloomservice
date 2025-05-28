@@ -30,7 +30,14 @@ func CalculateNumHashFunctions(size, n int) int {
 	return int(k)
 }
 
-func CalculateOptimalParameters(n int, p float64) (int, int) {
+func CalculateOptimalParameters(n int, p float64) Parameters {
 	size := CalculateSize(float64(n), p)
-	return size, CalculateNumHashFunctions(size, n)
+	numHashFunc := CalculateNumHashFunctions(size, n)
+
+	return Parameters{
+		Size:              uint(size),
+		NumItems:          0,
+		FalsePositiveRate: p,
+		NumHashFunctions:  uint8(numHashFunc),
+	}
 }

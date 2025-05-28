@@ -18,24 +18,40 @@ import (
 	"fmt"
 	"hash"
 	"math/rand"
+	"sync"
 
 	"github.com/spaolacci/murmur3"
 )
 
 var Filter *BloomFilter
 
-type BloomFilter struct {
-	// size of the bloom filter
-	size uint
+type Parameters struct {
+	// Size of the bloom filter in bits
+	Size uint `json:"size"`
+	// Number of hash functions used
+	NumHashFunctions uint8 `json:"num_hash_functions"`
+	// Number of items added to the bloom filter
+	NumItems uint `json:"num_items"`
+	// Estimated false positive rate
+	FalsePositiveRate float64 `json:"false_positive_rate"`
+}
 
-	// number of hash functions
-	hashFunctions int
+type BloomFilter struct {
+	// parameters for the bloom filter
+	params Parameters
 
 	// bit array to store the bloom filter
 	bitArray []bool // TODO: use a bit array instead of a slice of bools
 
 	// hash functions to use
 	hashFuncList []hash.Hash32
+
+	// TODO: use mutex for concurrent access
+	// mutex for concurrent access
+	mu *sync.RWMutex
+
+	// wait group for concurrent operations
+	wg *sync.WaitGroup
 }
 
 // New Creates a new BloomFilter based on the size and number of hash functions
@@ -47,19 +63,27 @@ type BloomFilter struct {
 // returns:
 //
 //	*BloomFilter	: pointer to the BloomFilter struct
-func New(size, hashFunctions int) *BloomFilter {
-	hashFuncList := make([]hash.Hash32, hashFunctions)
-	for i := range hashFunctions {
+func New(params Parameters) *BloomFilter {
+	// create hash functions
+	hashFuncList := make([]hash.Hash32, params.NumHashFunctions)
+	for i := range params.NumHashFunctions {
 		hashFuncList[i] = murmur3.New32WithSeed(rand.Uint32())
 	}
-	Filter = &BloomFilter{
-		size:          uint(size),
-		hashFunctions: hashFunctions,
-		bitArray:      make([]bool, size),
-		hashFuncList:  hashFuncList,
-	}
 
-	return Filter
+	return &BloomFilter{
+		params:       params,
+		bitArray:     make([]bool, params.Size),
+		hashFuncList: hashFuncList,
+		mu:           &sync.RWMutex{},
+		wg:           &sync.WaitGroup{},
+	}
+}
+
+func Init(estimatedKeyCount int, falsePositivePct float64) {
+	if Filter == nil {
+		params := CalculateOptimalParameters(estimatedKeyCount, falsePositivePct)
+		Filter = New(params)
+	}
 }
 
 // Add Adds an item to the bloom filter
@@ -71,10 +95,14 @@ func New(size, hashFunctions int) *BloomFilter {
 //
 //	none
 func (b *BloomFilter) Add(item string) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	idx := b.doHash(item)
 	for _, index := range idx {
 		b.bitArray[index] = true
 	}
+	b.params.NumItems++
 }
 
 // Exists Checks if an item is in the bloom filter
@@ -86,6 +114,9 @@ func (b *BloomFilter) Add(item string) {
 //
 //	bool	: true if the item is in the bloom filter, false otherwise
 func (b *BloomFilter) Exists(item string) bool {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
 	idx := b.doHash(item)
 	for _, index := range idx {
 		if !b.bitArray[index] {
@@ -104,7 +135,10 @@ func (b *BloomFilter) Exists(item string) bool {
 //
 //	none
 func (b *BloomFilter) Clear() {
-	b.bitArray = make([]bool, b.size)
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.bitArray = make([]bool, b.params.Size)
 }
 
 // doHash Hashes the input string using the hash functions
@@ -117,13 +151,13 @@ func (b *BloomFilter) Clear() {
 //
 //	[]int	: slice of indices to set in the bit array
 func (b *BloomFilter) doHash(input string) []uint {
-	idx := make([]uint, 0, b.hashFunctions)
+	idx := make([]uint, 0, b.params.NumHashFunctions)
 
 	for _, hashFunc := range b.hashFuncList {
 		hashFunc.Reset()
 		hashFunc.Write([]byte(input))
 		hashValue := hashFunc.Sum32()
-		index := uint(hashValue) % b.size
+		index := uint(hashValue) % b.params.Size
 		idx = append(idx, index)
 	}
 
@@ -131,5 +165,5 @@ func (b *BloomFilter) doHash(input string) []uint {
 }
 
 func (b *BloomFilter) String() string {
-	return fmt.Sprintf("BloomFilter{size: %d, hashFunctions: %d, bitArray: %v}", b.size, b.hashFunctions, b.bitArray)
+	return fmt.Sprintf("BloomFilter{size: %d, hashFunctions: %d, bitArray: %v}", b.params.Size, b.params.NumHashFunctions, b.bitArray)
 }

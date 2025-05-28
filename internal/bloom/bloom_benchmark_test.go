@@ -10,8 +10,8 @@ func BenchmarkBloomFilter_FalsePositives(b *testing.B) {
 	n := 100_000     // Number of items to add
 	testN := 100_000 // Number of items to test
 
-	size, hashes := CalculateOptimalParameters(n, 0.0005) // 0.05% false positive rate
-	filter := New(size, hashes)
+	params := CalculateOptimalParameters(n, 0.0005) // 0.05% false positive rate
+	filter := New(params)
 
 	items := test.GenerateStringsOfLength(10, n)
 	for _, item := range items {
