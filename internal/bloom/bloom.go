@@ -30,15 +30,23 @@ type Parameters struct {
 	Size uint `json:"size"`
 	// Number of hash functions used
 	NumHashFunctions uint8 `json:"num_hash_functions"`
-	// Number of items added to the bloom filter
-	NumItems uint `json:"num_items"`
 	// Estimated false positive rate
 	FalsePositiveRate float64 `json:"false_positive_rate"`
+}
+
+type Statistics struct {
+	// Number of items added to the bloom filter
+	AddedItems uint64 `json:"added_items"`
+	// Number of items checked in the bloom filter
+	CheckedItems uint64 `json:"checked_items"`
 }
 
 type BloomFilter struct {
 	// parameters for the bloom filter
 	params Parameters
+
+	// statistics for the bloom filter
+	stats Statistics
 
 	// bit array to store the bloom filter
 	bitArray []bool // TODO: use a bit array instead of a slice of bools
@@ -74,6 +82,7 @@ func New(params Parameters) *BloomFilter {
 		params:       params,
 		bitArray:     make([]bool, params.Size),
 		hashFuncList: hashFuncList,
+		stats:        Statistics{},
 		mu:           &sync.RWMutex{},
 		wg:           &sync.WaitGroup{},
 	}
@@ -98,11 +107,11 @@ func (b *BloomFilter) Add(item string) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
+	b.stats.AddedItems++
 	idx := b.doHash(item)
 	for _, index := range idx {
 		b.bitArray[index] = true
 	}
-	b.params.NumItems++
 }
 
 // Exists Checks if an item is in the bloom filter
@@ -116,7 +125,7 @@ func (b *BloomFilter) Add(item string) {
 func (b *BloomFilter) Exists(item string) bool {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
-
+	b.stats.CheckedItems++
 	idx := b.doHash(item)
 	for _, index := range idx {
 		if !b.bitArray[index] {
@@ -166,4 +175,15 @@ func (b *BloomFilter) doHash(input string) []uint {
 
 func (b *BloomFilter) String() string {
 	return fmt.Sprintf("BloomFilter{size: %d, hashFunctions: %d, bitArray: %v}", b.params.Size, b.params.NumHashFunctions, b.bitArray)
+}
+
+func (b *BloomFilter) GetParameters() Parameters {
+	return b.params
+}
+
+func (b *BloomFilter) GetStatistics() Statistics {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	return b.stats
 }

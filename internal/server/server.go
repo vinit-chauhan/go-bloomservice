@@ -19,7 +19,7 @@ import (
 	"github.com/vinit-chauhan/go-bloomservice/internal/api"
 )
 
-func StartServer() {
+func StartServer() *fiber.App {
 	app := fiber.New(
 		fiber.Config{
 			DisableStartupMessage: true,
@@ -31,5 +31,5 @@ func StartServer() {
 	app.Route("/", api.HealthRouter)
 	app.Route("/api/v1", api.BloomRouter)
 
-	app.Listen(":8080")
+	return app
 }

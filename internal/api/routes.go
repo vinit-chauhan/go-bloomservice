@@ -44,7 +44,6 @@ func BloomRouter(router fiber.Router) {
 	//   "size": 123456, // size of the Bloom filter in bits
 	//   "num_hash_functions": 5, // number of hash functions used
 	//   "num_items": 1000, // number of items added to the Bloom filter
-	//   "false_positive_rate": 0.01 // estimated false positive rate
 	// }
 	router.Get("/stats", handlers.StatsHandler)
 

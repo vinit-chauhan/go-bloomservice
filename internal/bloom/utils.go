@@ -36,7 +36,6 @@ func CalculateOptimalParameters(n int, p float64) Parameters {
 
 	return Parameters{
 		Size:              uint(size),
-		NumItems:          0,
 		FalsePositiveRate: p,
 		NumHashFunctions:  uint8(numHashFunc),
 	}

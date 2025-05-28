@@ -23,5 +23,13 @@ func main() {
 	estimatedKeys, falsePositiveRate := 100_000, 0.01
 	bloom.Init(estimatedKeys, falsePositiveRate)
 
-	server.StartServer()
+	app := server.StartServer()
+	app.Listen(":8080")
+
+	defer func() {
+		if err := app.Shutdown(); err != nil {
+			panic("Failed to shutdown server: " + err.Error())
+		}
+		bloom.Filter.Clear()
+	}()
 }
