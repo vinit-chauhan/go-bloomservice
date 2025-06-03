@@ -12,16 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package v1
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/vinit-chauhan/go-bloomservice/internal/api/handlers"
+	"github.com/vinit-chauhan/go-bloomservice/internal/api/v1/handlers"
 )
-
-func HealthRouter(router fiber.Router) {
-	router.Get("/health", handlers.HealthHandler)
-}
 
 func BloomRouter(router fiber.Router) {
 	// Add item to the Bloom filter

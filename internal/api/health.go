@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package handlers
+package api
 
 import "github.com/gofiber/fiber/v2"
 
@@ -23,4 +23,8 @@ func HealthHandler(c *fiber.Ctx) error {
 		"status":  "ok",
 		"message": "Bloom service is running",
 	})
+}
+
+func HealthRouter(router fiber.Router) {
+	router.Get("/health", HealthHandler)
 }

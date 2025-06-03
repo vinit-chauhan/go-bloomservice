@@ -17,6 +17,7 @@ package server
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/vinit-chauhan/go-bloomservice/internal/api"
+	api_v1 "github.com/vinit-chauhan/go-bloomservice/internal/api/v1"
 )
 
 func StartServer() *fiber.App {
@@ -29,7 +30,7 @@ func StartServer() *fiber.App {
 	)
 
 	app.Route("/", api.HealthRouter)
-	app.Route("/api/v1", api.BloomRouter)
+	app.Route("/api/v1", api_v1.BloomRouter)
 
 	return app
 }

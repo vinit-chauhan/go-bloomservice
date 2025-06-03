@@ -84,7 +84,6 @@ func New(params Parameters) *BloomFilter {
 		hashFuncList: hashFuncList,
 		stats:        Statistics{},
 		mu:           &sync.RWMutex{},
-		wg:           &sync.WaitGroup{},
 	}
 }
 
